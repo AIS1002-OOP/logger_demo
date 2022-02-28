@@ -2,8 +2,6 @@
 #include <fstream>
 #include <filesystem>
 #include <string>
-#include <memory>
-#include <optional>
 
 class noop_logger {
     void log(const std::string &) {}
