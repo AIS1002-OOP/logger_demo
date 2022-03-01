@@ -2,27 +2,24 @@
 #include <fstream>
 #include <filesystem>
 #include <string>
-#include <memory>
-#include <optional>
 
-class logger {
-public:
-    virtual void log(const std::string &str) = 0;
+class noop_logger {
+    void log(const std::string &) {}
 };
 
-class console_logger : public logger {
+class console_logger {
 public:
-    void log(const std::string &str) override {
+    void log(const std::string &str) {
         std::cout << str;
     }
 };
 
-class file_logger : public logger {
+class file_logger {
 
 public:
     explicit file_logger(const std::filesystem::path &path) : ofs_(path) {}
 
-    void log(const std::string &str) override {
+    void log(const std::string &str) {
         ofs_ << str;
     }
 
@@ -30,35 +27,34 @@ private:
     std::ofstream ofs_;
 };
 
+template<class Logger>
 class app {
 
 public:
 
-    explicit app(std::unique_ptr<logger> logger) : logger_(std::move(logger)) {}
+    explicit app(Logger logger = noop_logger()) : logger_(std::move(logger)) {}
 
     void run() {
         for (int i = 0; i < 10; i++) {
-            if (logger_) {
-                logger_->log("i=" + std::to_string(i) + "\n");
-            }
+            logger_.log("i=" + std::to_string(i) + "\n");
         }
     }
 
 private:
-    std::unique_ptr<logger> logger_;
+    Logger logger_;
 
 };
 
 int main() {
 
     {
-        auto logger = std::make_unique<console_logger>();
-        app myapp(std::move(logger));
+        console_logger logger;
+        app myapp(logger);
         myapp.run();
     }
 
     {
-        auto logger = std::make_unique<file_logger>("log.txt");
+        file_logger logger("log_template.txt");
         app myapp(std::move(logger));
         myapp.run();
     }
