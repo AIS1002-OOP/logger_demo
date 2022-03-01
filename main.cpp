@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <string>
 #include <memory>
-#include <optional>
 
 class logger {
 public:
